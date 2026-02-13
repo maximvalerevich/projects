@@ -29,9 +29,9 @@ export default async function AdminBotsPage() {
                         </div>
                         <p className="mt-2 text-sm text-zinc-500 truncate">Token: {bot.token.substring(0, 10)}...</p>
                         <div className="mt-4 flex justify-end">
-                            <button className="text-sm font-medium text-blue-600 hover:text-blue-500">
+                            <a href={`/editor/${bot.id}`} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-blue-600 hover:text-blue-500">
                                 Preview Flow
-                            </button>
+                            </a>
                         </div>
                     </div>
                 ))}

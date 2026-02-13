@@ -15,12 +15,13 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { createClient } from '@/utils/supabase/client';
+import Link from 'next/link';
 import Sidebar from './Sidebar';
 import PropertiesPanel from './PropertiesPanel';
 import MessageNode from './nodes/MessageNode';
 import InputNode from './nodes/InputNode';
 import ChoiceNode from './nodes/ChoiceNode';
-import { Loader2, Save } from 'lucide-react';
+import { Loader2, Save, ArrowLeft, ChevronRight } from 'lucide-react';
 
 const nodeTypes = {
     message: MessageNode,
@@ -33,11 +34,12 @@ const getId = () => `dndnode_${id++}`;
 
 interface FlowEditorProps {
     botId: string;
+    botName: string;
     initialNodes?: Node[];
     initialEdges?: Edge[];
 }
 
-export default function FlowEditor({ botId, initialNodes = [], initialEdges = [] }: FlowEditorProps) {
+export default function FlowEditor({ botId, botName, initialNodes = [], initialEdges = [] }: FlowEditorProps) {
     const reactFlowWrapper = useRef<HTMLDivElement>(null);
     const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
     const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
@@ -129,7 +131,16 @@ export default function FlowEditor({ botId, initialNodes = [], initialEdges = []
         <div className="flex h-screen w-full flex-col bg-white">
             {/* Header / Toolbar */}
             <header className="flex items-center justify-between border-b border-zinc-200 bg-white px-6 py-3">
-                <h1 className="text-lg font-semibold text-zinc-900">Bot Flow Editor</h1>
+                <div className="flex items-center gap-4">
+                    <Link href="/dashboard" className="rounded-full p-2 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 transition-colors">
+                        <ArrowLeft className="h-5 w-5" />
+                    </Link>
+                    <div className="flex items-center text-sm font-medium text-zinc-500">
+                        <Link href="/dashboard" className="hover:text-zinc-900 transition-colors">Dashboard</Link>
+                        <ChevronRight className="mx-2 h-4 w-4" />
+                        <span className="text-zinc-900">{botName}</span>
+                    </div>
+                </div>
                 <button
                     onClick={onSave}
                     disabled={saving}

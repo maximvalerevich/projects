@@ -35,6 +35,7 @@ export default async function EditorPage({ params }: { params: Promise<{ botId: 
         <div className="h-screen w-full">
             <FlowEditor
                 botId={botId}
+                botName={bot.name}
                 initialNodes={flow?.nodes || []}
                 initialEdges={flow?.edges || []}
             />
