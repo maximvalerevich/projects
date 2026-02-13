@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/utils/supabase/admin';
+import { deleteUser } from './actions';
 
 export default async function AdminUsersPage() {
     const supabase = createAdminClient();
@@ -37,10 +38,9 @@ export default async function AdminUsersPage() {
                                     {user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleDateString() : 'Never'}
                                 </td>
                                 <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
-                                    {/* Toggle Placeholder */}
-                                    <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
-                                        Active
-                                    </span>
+                                    <form action={deleteUser.bind(null, user.id)}>
+                                        <button type="submit" className="text-red-600 hover:text-red-900 font-medium">Delete</button>
+                                    </form>
                                 </td>
                             </tr>
                         ))}

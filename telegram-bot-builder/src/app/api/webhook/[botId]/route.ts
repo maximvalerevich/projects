@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/utils/supabase/client';
+import { createAdminClient } from '@/utils/supabase/admin';
 
 // Telegram types (simplified)
 type Update = {
@@ -33,6 +33,8 @@ export async function POST(
     const chatId = body.message.chat.id.toString();
     const text = body.message.text;
 
+    const supabase = createAdminClient();
+
     // 1. Fetch flow for this bot
     const { data: flow, error: flowError } = await supabase
         .from('flows')
@@ -45,10 +47,18 @@ export async function POST(
         return NextResponse.json({ error: 'Flow not found' }, { status: 404 });
     }
 
+    // @ts-ignore
+    const botToken = flow.bots?.token;
+
+    if (!botToken) {
+        console.error('Bot token not found');
+        return NextResponse.json({ error: 'Bot token not found' }, { status: 500 });
+    }
+
     // 2. Fetch or create session
     let { data: session, error: sessionError } = await supabase
         .from('sessions')
-        .select('*, bots(token)')
+        .select('*')
         .eq('bot_id', botId)
         .eq('user_id', chatId)
         .single();
@@ -60,11 +70,9 @@ export async function POST(
 
     let currentNodeId = session?.current_node_id;
 
-    // If no session, create one and start at the beginning (node without incoming edges usually, or a specific "start" type)
+    // If no session, create one and start at the beginning
     if (!session) {
-        // Find start node (e.g., node with no incoming edges or type 'start')
-        // For simplicity, let's assume the first node in the array is start, or ID '1'
-        // Better logic: find node with no source handle connected to it
+        // Find start node (node with no incoming edges)
         const targetNodeIds = new Set(flow.edges.map((e: any) => e.target));
         const startNode = flow.nodes.find((n: any) => !targetNodeIds.has(n.id));
 
@@ -78,16 +86,14 @@ export async function POST(
             console.error('Failed to create session', insertError);
             return NextResponse.json({ error: 'Failed to create session' }, { status: 500 });
         }
+
+        // If we just started, we might want to send the first message immediately
+        // For now, let's treat the user's first message as a trigger to send the start node's message
     }
 
-    // 3. Process current step
-    // If we are already at a node (e.g. waiting for input), process input
-    // Then move to next node
+    // 3. Process current step -> Find next node
 
-    // Simplified logic: Just find the next node connected to current node
-    // In a real engine, we'd check node type (e.g. if it's an Input node, valid input?)
-
-    // Find edge from current node
+    // Simple logic: Find edge from current node
     const edge = flow.edges.find((e: any) => e.source === currentNodeId);
     const nextNodeId = edge?.target;
 
@@ -95,13 +101,9 @@ export async function POST(
         // Move to next node
         const nextNode = flow.nodes.find((n: any) => n.id === nextNodeId);
 
-        // Execute node action (send message)
         if (nextNode) {
-            // @ts-ignore
-            const token = flow.bots?.token;
-            if (token) {
-                await sendMessage(token, chatId, nextNode.data.label || 'Default message');
-            }
+            // Send the message defined in the next node
+            await sendMessage(botToken, chatId, nextNode.data.label || 'Default message');
 
             // Update session
             await supabase
@@ -112,19 +114,22 @@ export async function POST(
         }
     } else {
         // End of flow or no connection
-        await sendMessage(flow.bot_token, chatId, "End of flow.");
+        await sendMessage(botToken, chatId, "End of flow.");
     }
-
 
     return NextResponse.json({ ok: true });
 }
 
 async function sendMessage(token: string, chatId: string, text: string) {
     const url = `https://api.telegram.org/bot${token}/sendMessage`;
-    const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: chatId, text: text })
-    });
-    return response.json();
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_id: chatId, text: text })
+        });
+        return await response.json();
+    } catch (error) {
+        console.error('Error sending message to Telegram:', error);
+    }
 }

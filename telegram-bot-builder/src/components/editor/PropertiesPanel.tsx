@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 
 type PropertiesPanelProps = {
     selectedNode: any | null; // React Flow Node
-    setNodes: React.Dispatch<React.SetStateAction<any[]>>;
+    onPropertyChange: (nodeId: string, newData: any) => void;
 };
 
-export default function PropertiesPanel({ selectedNode, setNodes }: PropertiesPanelProps) {
+export default function PropertiesPanel({ selectedNode, onPropertyChange }: PropertiesPanelProps) {
     const [label, setLabel] = useState('');
     const [text, setText] = useState('');
 
@@ -17,14 +17,9 @@ export default function PropertiesPanel({ selectedNode, setNodes }: PropertiesPa
     }, [selectedNode]);
 
     const updateNodeData = (key: string, value: any) => {
-        setNodes((nds) =>
-            nds.map((node) => {
-                if (node.id === selectedNode.id) {
-                    node.data = { ...node.data, [key]: value };
-                }
-                return node;
-            })
-        );
+        if (selectedNode) {
+            onPropertyChange(selectedNode.id, { [key]: value });
+        }
     };
 
     if (!selectedNode) {
