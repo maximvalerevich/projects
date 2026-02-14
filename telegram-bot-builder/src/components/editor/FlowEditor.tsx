@@ -130,24 +130,18 @@ export default function FlowEditor({ botId, botName, initialNodes = [], initialE
     return (
         <div className="flex h-screen w-full flex-col bg-white">
             {/* Header / Toolbar */}
-            <header className="flex items-center justify-between border-b border-zinc-200 bg-white px-6 py-3">
-                <div className="flex items-center gap-4">
-                    <Link href="/dashboard" className="rounded-full p-2 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 transition-colors">
-                        <ArrowLeft className="h-5 w-5" />
-                    </Link>
-                    <div className="flex items-center text-sm font-medium text-zinc-500">
-                        <Link href="/dashboard" className="hover:text-zinc-900 transition-colors">Dashboard</Link>
-                        <ChevronRight className="mx-2 h-4 w-4" />
-                        <span className="text-zinc-900">{botName}</span>
-                    </div>
+            <header className="flex h-14 items-center justify-between border-b border-border bg-card px-6 py-3">
+                <div className="flex items-center gap-2">
+                    <h1 className="text-lg font-semibold text-foreground">Constructor</h1>
+                    <span className="rounded bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">Draft</span>
                 </div>
                 <button
                     onClick={onSave}
                     disabled={saving}
-                    className="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                    className="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
                 >
                     {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                    Save Flow
+                    Save Changes
                 </button>
             </header>
 
