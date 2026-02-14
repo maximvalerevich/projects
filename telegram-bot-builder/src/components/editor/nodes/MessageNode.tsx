@@ -24,13 +24,29 @@ const MessageNode = ({ id, data, selected }: NodeProps) => {
                 </button>
             </div>
 
-            <div className="p-3">
-                <div className="text-sm text-zinc-700">
-                    {data.label || 'Enter message...'}
+            <div className="p-3 space-y-3">
+                {/* Content Blocks Preview */}
+                <div className="space-y-2">
+                    {data.content_blocks && data.content_blocks.length > 0 ? (
+                        data.content_blocks.map((block: any) => (
+                            <div key={block.id} className="text-[10px] text-zinc-600 bg-zinc-50 rounded border border-zinc-100 p-1.5 truncate">
+                                <span className="font-bold uppercase text-[9px] text-zinc-400 mr-1">{block.type}:</span>
+                                {block.content || block.url || 'Empty'}
+                            </div>
+                        ))
+                    ) : (
+                        <div className="text-[10px] text-zinc-400 italic">No content blocks</div>
+                    )}
                 </div>
-                {data.text && (
-                    <div className="mt-2 text-xs text-zinc-500 line-clamp-2">
-                        {data.text}
+
+                {/* Keyboard Preview */}
+                {data.keyboard && data.keyboard.length > 0 && (
+                    <div className="grid grid-cols-2 gap-1 border-t border-zinc-50 pt-2">
+                        {data.keyboard.map((btn: any, idx: number) => (
+                            <div key={idx} className="text-[9px] text-center bg-blue-50 text-blue-600 rounded py-1 px-1 border border-blue-100 truncate">
+                                {btn.text}
+                            </div>
+                        ))}
                     </div>
                 )}
             </div>

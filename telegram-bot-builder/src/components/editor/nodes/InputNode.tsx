@@ -24,12 +24,23 @@ const InputNode = ({ id, data, selected }: NodeProps) => {
                 </button>
             </div>
 
-            <div className="p-3">
-                <div className="text-sm text-zinc-700">
-                    {data.label || 'Wait for user input...'}
+            <div className="p-3 space-y-3">
+                {/* Content Blocks Preview */}
+                <div className="space-y-2">
+                    {data.content_blocks && data.content_blocks.length > 0 ? (
+                        data.content_blocks.map((block: any) => (
+                            <div key={block.id} className="text-[10px] text-zinc-600 bg-zinc-50 rounded border border-zinc-100 p-1.5 truncate">
+                                <span className="font-bold uppercase text-[9px] text-zinc-400 mr-1">{block.type}:</span>
+                                {block.content || block.url || 'Empty'}
+                            </div>
+                        ))
+                    ) : (
+                        <div className="text-[10px] text-zinc-400 italic">No content blocks</div>
+                    )}
                 </div>
-                <div className="mt-2 text-xs italic text-zinc-400">
-                    Stores response in variable...
+
+                <div className="mt-2 text-[10px] italic text-green-600 bg-green-50 p-1 rounded border border-green-100 text-center">
+                    Waiting for user response...
                 </div>
             </div>
 

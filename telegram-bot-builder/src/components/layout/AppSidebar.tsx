@@ -21,11 +21,11 @@ interface AppSidebarProps {
 }
 
 const menuItems = [
-    { name: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
+    { name: 'Dashboard', icon: LayoutDashboard, href: '' },
     { name: 'Moderation', icon: ShieldCheck, href: '/moderation' },
     { name: 'Posting', icon: Send, href: '/posting' },
     { name: 'Scenarios', icon: Workflow, href: '/scenarios' },
-    { name: 'Constructor', icon: Bot, href: '/editor' },
+    { name: 'Constructor', icon: Bot, href: '/constructor' },
     { name: 'Shop', icon: ShoppingBag, href: '/shop' },
     { name: 'Dialogs', icon: MessageCircle, href: '/dialogs' },
     { name: 'Variables', icon: Braces, href: '/variables' },
@@ -50,27 +50,18 @@ export function AppSidebar({ botId }: AppSidebarProps) {
             <nav className="flex-1 overflow-y-auto py-4">
                 <div className="space-y-1 px-2">
                     {menuItems.map((item) => {
-                        // Construct the full path: /bot/[botId]/[item.href]
-                        // Note: Our current routing is a bit mixed. 
-                        // Constructor is at /editor/[botId].
-                        // We need to standardize or handle redirects.
-                        // For now, let's map them logically based on the current structure where possible, 
-                        // and assume new routes will follow /bot/[botId]/[feature] pattern.
-
                         let href = `/bot/${botId}${item.href}`;
-                        if (item.name === 'Constructor') href = `/editor/${botId}`;
-                        // if (item.name === 'Dashboard') href = `/bot/${botId}/dashboard`; // Future
 
                         // Highlight active if pathname starts with href (simple check)
-                        const isActive = pathname === href || pathname.startsWith(href);
+                        const isActive = pathname === href || (item.href !== '' && pathname.startsWith(href));
 
                         return (
                             <Link
                                 key={item.name}
                                 href={href}
                                 className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${isActive
-                                        ? 'bg-primary/10 text-primary'
-                                        : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                                    ? 'bg-primary/10 text-primary'
+                                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                                     }`}
                             >
                                 <item.icon className="h-5 w-5" />

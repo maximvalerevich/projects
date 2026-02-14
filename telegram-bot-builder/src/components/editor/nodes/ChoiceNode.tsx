@@ -24,20 +24,34 @@ const ChoiceNode = ({ id, data, selected }: NodeProps) => {
                 </button>
             </div>
 
-            <div className="p-3">
-                <div className="text-sm text-zinc-700 mb-2">
-                    {data.label || 'Select an option...'}
+            <div className="p-3 space-y-3">
+                {/* Content Blocks Preview */}
+                <div className="space-y-2">
+                    {data.content_blocks && data.content_blocks.length > 0 ? (
+                        data.content_blocks.map((block: any) => (
+                            <div key={block.id} className="text-[10px] text-zinc-600 bg-zinc-50 rounded border border-zinc-100 p-1.5 truncate">
+                                <span className="font-bold uppercase text-[9px] text-zinc-400 mr-1">{block.type}:</span>
+                                {block.content || block.url || 'Empty'}
+                            </div>
+                        ))
+                    ) : (
+                        <div className="text-[10px] text-zinc-400 italic">No content blocks</div>
+                    )}
                 </div>
-                {data.options && data.options.length > 0 ? (
-                    <div className="space-y-1">
-                        {data.options.map((opt: string, idx: number) => (
-                            <div key={idx} className="rounded bg-zinc-100 px-2 py-1 text-xs text-zinc-600 border border-zinc-200">
-                                {opt}
+
+                {/* Keyboard Preview */}
+                {data.keyboard && data.keyboard.length > 0 ? (
+                    <div className="grid grid-cols-2 gap-1 border-t border-zinc-50 pt-2">
+                        {data.keyboard.map((btn: any, idx: number) => (
+                            <div key={idx} className="text-[9px] text-center bg-purple-50 text-purple-600 rounded py-1 px-1 border border-purple-100 truncate">
+                                {btn.text}
                             </div>
                         ))}
                     </div>
                 ) : (
-                    <div className="text-xs text-zinc-400 italic">No options defined</div>
+                    <div className="text-[10px] text-zinc-400 italic text-center py-2 bg-zinc-50 rounded border border-dashed border-zinc-200">
+                        No choices defined
+                    </div>
                 )}
             </div>
 
