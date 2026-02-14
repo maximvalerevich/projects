@@ -15,13 +15,13 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { createClient } from '@/utils/supabase/client';
-import Link from 'next/link';
+import { v4 as uuidv4 } from 'uuid';
 import Sidebar from './Sidebar';
 import PropertiesPanel from './PropertiesPanel';
 import MessageNode from './nodes/MessageNode';
 import InputNode from './nodes/InputNode';
 import ChoiceNode from './nodes/ChoiceNode';
-import { Loader2, Save, ArrowLeft, ChevronRight } from 'lucide-react';
+import { Loader2, Save } from 'lucide-react';
 
 const nodeTypes = {
     message: MessageNode,
@@ -29,8 +29,7 @@ const nodeTypes = {
     choice: ChoiceNode,
 };
 
-let id = 0;
-const getId = () => `dndnode_${id++}`;
+const getId = () => uuidv4();
 
 interface FlowEditorProps {
     botId: string;
@@ -78,7 +77,11 @@ export default function FlowEditor({ botId, botName, initialNodes = [], initialE
                 id: getId(),
                 type,
                 position,
-                data: { label: `${type} node` },
+                data: {
+                    label: `${type} node`,
+                    content_blocks: [{ id: uuidv4(), type: 'text', content: 'Hello!' }],
+                    keyboard: []
+                },
             };
 
             setNodes((nds) => nds.concat(newNode));
@@ -99,7 +102,6 @@ export default function FlowEditor({ botId, botName, initialNodes = [], initialE
                 return node;
             })
         );
-        // Update selected node reference to reflect changes immediately in panel if needed
         setSelectedNode((prev) => (prev?.id === nodeId ? { ...prev, data: { ...prev.data, ...newData } } : prev));
     }, [setNodes]);
 
@@ -108,27 +110,53 @@ export default function FlowEditor({ botId, botName, initialNodes = [], initialE
             setSaving(true);
             const flow = reactFlowInstance.toObject();
 
-            const { error } = await supabase
-                .from('flows')
-                .upsert({
-                    bot_id: botId,
-                    nodes: flow.nodes,
-                    edges: flow.edges,
-                    updated_at: new Date().toISOString(),
-                    is_published: true // Auto-publish for MVP
-                }, { onConflict: 'bot_id' });
+            try {
+                // Relational Sync
+                // 1. Delete existing for this bot
+                await supabase.from('commands').delete().eq('bot_id', botId);
+                await supabase.from('edges').delete().eq('bot_id', botId);
 
-            if (error) {
-                alert('Error saving flow: ' + error.message);
-            } else {
-                alert('Flow saved successfully!');
+                // 2. Insert Commands (Nodes)
+                const commandsToInsert = flow.nodes.map((node: Node) => ({
+                    id: node.id,
+                    bot_id: botId,
+                    name: node.data.label || 'Unnamed Node',
+                    type: node.type || 'regular',
+                    content_blocks: node.data.content_blocks || [],
+                    keyboard: node.data.keyboard || [],
+                    coordinates: node.position
+                }));
+
+                if (commandsToInsert.length > 0) {
+                    const { error: nodeError } = await supabase.from('commands').insert(commandsToInsert);
+                    if (nodeError) throw nodeError;
+                }
+
+                // 3. Insert Edges
+                const edgesToInsert = flow.edges.map((edge: Edge) => ({
+                    bot_id: botId,
+                    source_node_id: edge.source,
+                    target_node_id: edge.target,
+                    source_handle: edge.sourceHandle
+                }));
+
+                if (edgesToInsert.length > 0) {
+                    const { error: edgeError } = await supabase.from('edges').insert(edgesToInsert);
+                    if (edgeError) throw edgeError;
+                }
+
+                alert('Design saved successfully!');
+            } catch (err: any) {
+                console.error(err);
+                alert('Error saving flow: ' + err.message);
+            } finally {
+                setSaving(false);
             }
-            setSaving(false);
         }
     };
 
     return (
-        <div className="flex h-screen w-full flex-col bg-white">
+        <div className="flex h-screen w-full flex-col bg-background">
             {/* Header / Toolbar */}
             <header className="flex h-14 items-center justify-between border-b border-border bg-card px-6 py-3">
                 <div className="flex items-center gap-2">

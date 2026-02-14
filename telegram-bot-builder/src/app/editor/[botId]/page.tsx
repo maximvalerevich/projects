@@ -23,21 +23,44 @@ export default async function EditorPage({ params }: { params: Promise<{ botId: 
         return <div>Bot not found or access denied.</div>
     }
 
-    // Fetch existing flow or create logic handled in Editor? 
-    // Better to fetch here and pass as initialData
-    const { data: flow } = await supabase
-        .from('flows')
+    // Fetch nodes (commands) and edges
+    const { data: dbCommands } = await supabase
+        .from('commands')
         .select('*')
         .eq('bot_id', botId)
-        .single()
+
+    const { data: dbEdges } = await supabase
+        .from('edges')
+        .select('*')
+        .eq('bot_id', botId)
+
+    // Transform DB commands to React Flow nodes
+    const initialNodes = (dbCommands || []).map((cmd) => ({
+        id: cmd.id,
+        type: cmd.type,
+        position: cmd.coordinates || { x: 0, y: 0 },
+        data: {
+            label: cmd.name,
+            content_blocks: cmd.content_blocks,
+            keyboard: cmd.keyboard,
+        },
+    }))
+
+    // Transform DB edges to React Flow edges
+    const initialEdges = (dbEdges || []).map((edge) => ({
+        id: edge.id,
+        source: edge.source_node_id,
+        target: edge.target_node_id,
+        sourceHandle: edge.source_handle,
+    }))
 
     return (
         <div className="h-screen w-full">
             <FlowEditor
                 botId={botId}
                 botName={bot.name}
-                initialNodes={flow?.nodes || []}
-                initialEdges={flow?.edges || []}
+                initialNodes={initialNodes}
+                initialEdges={initialEdges}
             />
         </div>
     )
