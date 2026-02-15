@@ -21,12 +21,14 @@ import PropertiesPanel from './PropertiesPanel';
 import MessageNode from './nodes/MessageNode';
 import InputNode from './nodes/InputNode';
 import ChoiceNode from './nodes/ChoiceNode';
+import ConditionNode from './nodes/ConditionNode';
 import { Loader2, Save } from 'lucide-react';
 
 const nodeTypes = {
     message: MessageNode,
     input: InputNode,
     choice: ChoiceNode,
+    condition: ConditionNode,
 };
 
 const getId = () => uuidv4();
@@ -79,8 +81,9 @@ export default function FlowEditor({ botId, botName, initialNodes = [], initialE
                 position,
                 data: {
                     label: `${type} node`,
-                    content_blocks: [{ id: uuidv4(), type: 'text', content: 'Hello!' }],
-                    keyboard: []
+                    content_blocks: type !== 'condition' ? [{ id: uuidv4(), type: 'text', content: 'Hello!' }] : [],
+                    keyboard: [],
+                    condition: type === 'condition' ? { variable: '', operator: 'equals', value: '' } : null
                 },
             };
 
@@ -195,7 +198,7 @@ export default function FlowEditor({ botId, botName, initialNodes = [], initialE
                             <Background variant={BackgroundVariant.Dots} gap={12} size={1} color="#E4E4E7" />
                         </ReactFlow>
                     </div>
-                    <PropertiesPanel selectedNode={selectedNode} onPropertyChange={onPropertyChange} />
+                    <PropertiesPanel botId={botId} selectedNode={selectedNode} onPropertyChange={onPropertyChange} />
                 </ReactFlowProvider>
             </div>
         </div>
