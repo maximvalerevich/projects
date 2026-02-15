@@ -23,16 +23,27 @@ type PropertiesPanelProps = {
 export default function PropertiesPanel({ botId, selectedNode, onPropertyChange }: PropertiesPanelProps) {
     const supabase = createClient();
     const [variables, setVariables] = useState<any[]>([]);
+    const [products, setProducts] = useState<any[]>([]);
     const [loadingVars, setLoadingVars] = useState(false);
+    const [loadingProducts, setLoadingProducts] = useState(false);
 
     useEffect(() => {
-        const fetchVars = async () => {
+        const fetchData = async () => {
             setLoadingVars(true);
-            const { data } = await supabase.from('variables').select('*').eq('bot_id', botId);
-            setVariables(data || []);
+            setLoadingProducts(true);
+
+            const [varRes, prodRes] = await Promise.all([
+                supabase.from('variables').select('*').eq('bot_id', botId),
+                supabase.from('products').select('*').eq('bot_id', botId)
+            ]);
+
+            setVariables(varRes.data || []);
+            setProducts(prodRes.data || []);
+
             setLoadingVars(false);
+            setLoadingProducts(false);
         };
-        if (botId) fetchVars();
+        if (botId) fetchData();
     }, [botId, supabase]);
 
     const updateData = (updates: any) => {
@@ -217,15 +228,30 @@ export default function PropertiesPanel({ botId, selectedNode, onPropertyChange 
                                             <option value="node">Next Node</option>
                                             <option value="pay">Payment</option>
                                         </select>
-                                        <input
-                                            type="text"
-                                            placeholder={btn.type === 'node' ? 'Node ID...' : 'Value...'}
-                                            className="flex-1 text-[10px] px-2 py-1 rounded bg-white border border-zinc-200 outline-none"
-                                            value={btn.value}
-                                            onChange={(e) => updateData({
-                                                keyboard: data.keyboard.map((b: any) => b.id === btn.id ? { ...b, value: e.target.value } : b)
-                                            })}
-                                        />
+                                        {btn.type === 'pay' ? (
+                                            <select
+                                                className="flex-1 text-[10px] px-2 py-1 rounded bg-white border border-zinc-200 outline-none"
+                                                value={btn.value}
+                                                onChange={(e) => updateData({
+                                                    keyboard: data.keyboard.map((b: any) => b.id === btn.id ? { ...b, value: e.target.value } : b)
+                                                })}
+                                            >
+                                                <option value="">Select product...</option>
+                                                {products.map(p => (
+                                                    <option key={p.id} value={p.id}>{p.name} ({p.price} {p.currency})</option>
+                                                ))}
+                                            </select>
+                                        ) : (
+                                            <input
+                                                type="text"
+                                                placeholder={btn.type === 'node' ? 'Node ID...' : 'Value...'}
+                                                className="flex-1 text-[10px] px-2 py-1 rounded bg-white border border-zinc-200 outline-none"
+                                                value={btn.value}
+                                                onChange={(e) => updateData({
+                                                    keyboard: data.keyboard.map((b: any) => b.id === btn.id ? { ...b, value: e.target.value } : b)
+                                                })}
+                                            />
+                                        )}
                                     </div>
                                 </div>
                             ))}
