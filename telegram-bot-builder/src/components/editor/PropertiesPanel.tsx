@@ -103,8 +103,13 @@ export default function PropertiesPanel({ botId, selectedNode, onPropertyChange 
                                 <label className="text-[10px] text-amber-900/60 font-medium">Variable</label>
                                 <select
                                     className="w-full h-9 rounded-md border border-amber-200 bg-white text-xs px-2 outline-none focus:ring-2 focus:ring-amber-500/20"
-                                    value={data.condition?.variable || ''}
-                                    onChange={(e) => updateData({ condition: { ...data.condition, variable: e.target.value } })}
+                                    value={data.settings?.condition?.variable || ''}
+                                    onChange={(e) => updateData({
+                                        settings: {
+                                            ...data.settings,
+                                            condition: { ...(data.settings?.condition || {}), variable: e.target.value }
+                                        }
+                                    })}
                                 >
                                     <option value="">Select variable...</option>
                                     {variables.map(v => <option key={v.id} value={v.name}>{v.name}</option>)}
@@ -116,8 +121,13 @@ export default function PropertiesPanel({ botId, selectedNode, onPropertyChange 
                                     <label className="text-[10px] text-amber-900/60 font-medium">Operator</label>
                                     <select
                                         className="w-full h-9 rounded-md border border-amber-200 bg-white text-xs px-2 outline-none"
-                                        value={data.condition?.operator || 'equals'}
-                                        onChange={(e) => updateData({ condition: { ...data.condition, operator: e.target.value } })}
+                                        value={data.settings?.condition?.operator || 'equals'}
+                                        onChange={(e) => updateData({
+                                            settings: {
+                                                ...data.settings,
+                                                condition: { ...(data.settings?.condition || {}), operator: e.target.value }
+                                            }
+                                        })}
                                     >
                                         <option value="equals">Equals</option>
                                         <option value="not_equals">Not equals</option>
@@ -132,8 +142,13 @@ export default function PropertiesPanel({ botId, selectedNode, onPropertyChange 
                                         type="text"
                                         className="w-full h-9 rounded-md border border-amber-200 bg-white text-xs px-3 outline-none"
                                         placeholder="Value..."
-                                        value={data.condition?.value || ''}
-                                        onChange={(e) => updateData({ condition: { ...data.condition, value: e.target.value } })}
+                                        value={data.settings?.condition?.value || ''}
+                                        onChange={(e) => updateData({
+                                            settings: {
+                                                ...data.settings,
+                                                condition: { ...(data.settings?.condition || {}), value: e.target.value }
+                                            }
+                                        })}
                                     />
                                 </div>
                             </div>
@@ -141,6 +156,29 @@ export default function PropertiesPanel({ botId, selectedNode, onPropertyChange 
                         <p className="text-[10px] text-amber-700 leading-relaxed italic">
                             If the rule is met, the "TRUE" handle will be used. Otherwise, it follows "FALSE".
                         </p>
+                    </div>
+                )}
+
+                {/* Input-Specific Settings */}
+                {type === 'input' && (
+                    <div className="space-y-4 rounded-xl border border-blue-100 bg-blue-50/50 p-4">
+                        <div className="text-[10px] font-bold text-blue-600 uppercase tracking-wider">Input Settings</div>
+                        <div className="space-y-1">
+                            <label className="text-[10px] text-blue-900/60 font-medium">Save to Variable</label>
+                            <select
+                                className="w-full h-9 rounded-md border border-blue-200 bg-white text-xs px-2 outline-none focus:ring-2 focus:ring-blue-500/20"
+                                value={data.settings?.variable_name || ''}
+                                onChange={(e) => updateData({
+                                    settings: { ...data.settings, variable_name: e.target.value }
+                                })}
+                            >
+                                <option value="">Select variable...</option>
+                                {variables.map(v => <option key={v.id} value={v.name}>{v.name}</option>)}
+                            </select>
+                            <p className="text-[10px] text-blue-700 leading-relaxed italic mt-2">
+                                The user's reply will be saved to this variable.
+                            </p>
+                        </div>
                     </div>
                 )}
 

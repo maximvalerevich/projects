@@ -83,7 +83,8 @@ export default function FlowEditor({ botId, botName, initialNodes = [], initialE
                     label: `${type} node`,
                     content_blocks: type !== 'condition' ? [{ id: uuidv4(), type: 'text', content: 'Hello!' }] : [],
                     keyboard: [],
-                    condition: type === 'condition' ? { variable: '', operator: 'equals', value: '' } : null
+                    settings: type === 'condition' ? { condition: { variable: '', operator: 'equals', value: '' } } :
+                        type === 'input' ? { variable_name: '' } : {}
                 },
             };
 
@@ -127,6 +128,7 @@ export default function FlowEditor({ botId, botName, initialNodes = [], initialE
                     type: node.type || 'regular',
                     content_blocks: node.data.content_blocks || [],
                     keyboard: node.data.keyboard || [],
+                    settings: node.data.settings || {},
                     coordinates: node.position
                 }));
 
