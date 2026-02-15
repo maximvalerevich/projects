@@ -35,11 +35,16 @@ export const ContentBlock = ({ block, onChange, onDelete }: ContentBlockProps) =
             <div className="flex-1 space-y-3">
                 {/* Header: Icon + Type + Settings */}
                 <div className="flex items-center justify-between border-b border-border pb-2">
-                    <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase">
-                        {block.type === 'text' && <Type className="h-3.5 w-3.5" />}
-                        {block.type === 'image' && <ImageIcon className="h-3.5 w-3.5" />}
-                        {block.type === 'video' && <Video className="h-3.5 w-3.5" />}
-                        <span>{block.type.replace('_', ' ')}</span>
+                    <div className="flex items-center gap-2">
+                        <select
+                            value={block.type}
+                            onChange={(e) => onChange(block.id, { type: e.target.value as any })}
+                            className="bg-transparent text-[10px] font-bold text-zinc-400 uppercase tracking-wider outline-none cursor-pointer hover:text-primary transition-colors"
+                        >
+                            <option value="text">TEXT</option>
+                            <option value="image">IMAGE</option>
+                            <option value="video">VIDEO</option>
+                        </select>
                     </div>
                     <div className="flex items-center gap-1">
                         <button className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground">

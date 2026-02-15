@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Plus, Bot, Settings } from 'lucide-react'
 import CreateBotButton from './create-bot-button'
 import ConnectWebhookButton from './connect-webhook-button'
+import DeleteBotButton from './delete-bot-button'
 
 export default async function DashboardPage() {
     const supabase = await createClient()
@@ -54,7 +55,10 @@ export default async function DashboardPage() {
                                     <div className="flex-1 p-6">
                                         <div className="flex items-center justify-between">
                                             <h3 className="text-lg font-medium text-gray-900">{bot.name}</h3>
-                                            <Bot className="h-5 w-5 text-gray-400" />
+                                            <div className="flex items-center gap-1">
+                                                <DeleteBotButton botId={bot.id} botName={bot.name} />
+                                                <Bot className="h-5 w-5 text-gray-400" />
+                                            </div>
                                         </div>
                                         <p className="mt-2 text-sm text-gray-500 truncate">
                                             Token: {bot.token ? '••••••••' + bot.token.slice(-4) : 'Not set'}
